@@ -66,6 +66,7 @@ class MainActivity : AppCompatActivity() {
         builder.setTitle("New project")
 
         val dialogView = LayoutInflater.from(this).inflate(R.layout.dialog_new_project, null)
+        dialogView.projectNameEditText.setText("New project")
         builder.setView(dialogView)
         builder.setPositiveButton("Create", { dialog, which ->
             run {
@@ -235,6 +236,20 @@ class ProjectListAdapter(context: Context, list: ArrayList<Project>, val databas
             insert(updated, position)
             notifyDataSetChanged()
             startActivity(context, i, Bundle.EMPTY)
+        }
+        view.removeProjectButton.setOnClickListener {
+            val builder = AlertDialog.Builder(context)
+            builder.setTitle("Remove project?")
+            builder.setPositiveButton("Remove", { dialog, which ->
+                run {
+                    remove(project)
+                    databaseHelper.removeProject(project.id)
+                    Snackbar.make(view, "Project ${project.name} (${project.id}) has been removed", Snackbar.LENGTH_LONG).show()
+                }
+            })
+            builder.setNegativeButton("Cancel", { dialog, which -> dialog.cancel() })
+
+            builder.show()
         }
         return view
     }

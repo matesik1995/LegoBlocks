@@ -124,7 +124,7 @@ class PartListAdapter(context: Context, list: ArrayList<InventoryPart>, val data
         }
         view.increaseQty.setOnClickListener({
             if (part.qtyInStore < part.qtyInSet) {
-                databaseHelper.increaseQty(part.inventoryId, part.itemId)
+                databaseHelper.increaseQty(part)
                 remove(part)
                 insert(part.copy(qtyInStore = part.qtyInStore + 1), position)
                 notifyDataSetChanged()
@@ -132,7 +132,7 @@ class PartListAdapter(context: Context, list: ArrayList<InventoryPart>, val data
         })
         view.decreaseQty.setOnClickListener({
             if (part.qtyInStore > 0) {
-                databaseHelper.decreaseQty(part.inventoryId, part.itemId)
+                databaseHelper.decreaseQty(part)
                 remove(part)
                 insert(part.copy(qtyInStore = part.qtyInStore - 1), position)
                 notifyDataSetChanged()

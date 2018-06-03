@@ -115,6 +115,14 @@ class DataBaseHelper(private val myContext: Context) : SQLiteOpenHelper(myContex
         return project
     }
 
+    fun removeProject(id: Int) {
+        val query = "SELECT * FROM ${TABLE.INVENTORIES} WHERE ${FIELD.ID} = $id"
+        val db = this.readableDatabase
+        db.delete(TABLE.INVENTORIES, "${FIELD.ID} = ?", arrayOf(id.toString()))
+        db.delete(TABLE.INVENTORIES_PARTS, "${FIELD.INVENTORY_ID} = ?", arrayOf(id.toString()))
+        db.close()
+    }
+
     fun fetchProjects(): ArrayList<Project> {
         val db = this.readableDatabase
         val cursor = db.rawQuery("SELECT * FROM ${TABLE.INVENTORIES}", null)
@@ -293,15 +301,15 @@ class DataBaseHelper(private val myContext: Context) : SQLiteOpenHelper(myContex
         return code
     }
 
-    fun increaseQty(invId: Int, itemId: Int) {
-        val query = "UPDATE ${TABLE.INVENTORIES_PARTS} SET ${FIELD.QTY_IN_STORE} = ${FIELD.QTY_IN_STORE} + 1 WHERE ${FIELD.INVENTORY_ID} = $invId AND ${FIELD.ITEM_ID} = $itemId"
+    fun increaseQty(part: InventoryPart) {
+        val query = "UPDATE ${TABLE.INVENTORIES_PARTS} SET ${FIELD.QTY_IN_STORE} = ${FIELD.QTY_IN_STORE} + 1 WHERE ${FIELD.INVENTORY_ID} = ${part.inventoryId} AND ${FIELD.ITEM_ID} = ${part.itemId} AND ${FIELD.COLOR_ID} = ${part.colorId}"
         val db = this.readableDatabase
         db.execSQL(query)
         db.close()
     }
 
-    fun decreaseQty(invId: Int, itemId: Int) {
-        val query = "UPDATE ${TABLE.INVENTORIES_PARTS} SET ${FIELD.QTY_IN_STORE} = ${FIELD.QTY_IN_STORE} - 1 WHERE ${FIELD.INVENTORY_ID} = $invId AND ${FIELD.ITEM_ID} = $itemId"
+    fun decreaseQty(part: InventoryPart) {
+        val query = "UPDATE ${TABLE.INVENTORIES_PARTS} SET ${FIELD.QTY_IN_STORE} = ${FIELD.QTY_IN_STORE} - 1 WHERE ${FIELD.INVENTORY_ID} = ${part.inventoryId} AND ${FIELD.ITEM_ID} = ${part.itemId} AND ${FIELD.COLOR_ID} = ${part.colorId}"
         val db = this.readableDatabase
         db.execSQL(query)
         db.close()
