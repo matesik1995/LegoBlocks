@@ -88,13 +88,13 @@ class MainActivity : AppCompatActivity() {
         builder.show()
     }
 
-    private inner class CreateProjectWithInventory(val project: Project) : AsyncTask<Int, Unit, List<InventoryPart>>() {
+    private inner class CreateProjectWithInventory(val project: Project) : AsyncTask<Int, String, List<InventoryPart>>() {
         val apiUrl = getSharedPreferences("myPreferences", Context.MODE_PRIVATE).getString("apiUrl", "http://fcds.cs.put.poznan.pl/MyWeb/BL/")
         val ext = ".xml"
 
         override fun onPreExecute() {
             super.onPreExecute()
-            progressBar.visibility = View.VISIBLE
+            progressLayout.visibility = View.VISIBLE
             projectList.visibility = View.GONE
         }
 
@@ -102,9 +102,11 @@ class MainActivity : AppCompatActivity() {
 //            Thread.sleep(1000)
             val inventoryId = ids[0]!!
             val parts = LinkedList<InventoryPart>()
+            publishProgress("Fetching inventory...")
             try {
                 val url = URL(apiUrl + inventoryId + ext)
                 val urlConnection = url.openConnection() as HttpURLConnection
+                publishProgress("Parsing XML file...")
                 try {
                     val factory = XmlPullParserFactory.newInstance()
                     factory.isNamespaceAware = true
@@ -168,8 +170,11 @@ class MainActivity : AppCompatActivity() {
             } catch (e: Exception) {
                 Log.e("ERROR", e.message, e)
             }
-            Log.i("Info", "here")
+
+            publishProgress("Fetching item images...")
+            var i = 0
             parts.forEach({
+                publishProgress("Fetching item images... ${++i} / ${parts.size}")
                 var bitmap: Bitmap? = null
                 val imageCode = myDbHelper.getImageCode(it.itemId, it.colorId)
                 if (imageCode != null) {
@@ -184,7 +189,13 @@ class MainActivity : AppCompatActivity() {
                     myDbHelper.insertImage(it.itemId, it.colorId, bitmap)
                 }
             })
+            publishProgress("Done")
             return parts
+        }
+
+        override fun onProgressUpdate(vararg values: String) {
+            progressText.setText(values[0])
+            super.onProgressUpdate(*values)
         }
 
         override fun onPostExecute(result: List<InventoryPart>) {
@@ -196,7 +207,7 @@ class MainActivity : AppCompatActivity() {
                 Snackbar.make(mainActivity, "Project ${project.name} (${project.id}) successfully created", Snackbar.LENGTH_LONG).show()
                 super.onPostExecute(result)
             }
-            progressBar.visibility = View.GONE
+            progressLayout.visibility = View.GONE
             projectList.visibility = View.VISIBLE
         }
 
@@ -233,7 +244,7 @@ class ProjectListAdapter(context: Context, list: ArrayList<Project>, val databas
             val updated = project.copy(lastAccessed = (System.currentTimeMillis() / 1000).toInt())
             databaseHelper.updateProject(updated)
             remove(project)
-            insert(updated, position)
+            insert(updated, 0)
             notifyDataSetChanged()
             startActivity(context, i, Bundle.EMPTY)
         }

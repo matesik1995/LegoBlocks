@@ -125,7 +125,7 @@ class DataBaseHelper(private val myContext: Context) : SQLiteOpenHelper(myContex
 
     fun fetchProjects(): ArrayList<Project> {
         val db = this.readableDatabase
-        val cursor = db.rawQuery("SELECT * FROM ${TABLE.INVENTORIES}", null)
+        val cursor = db.rawQuery("SELECT * FROM ${TABLE.INVENTORIES} ORDER BY ${FIELD.LAST_ACCESSED} DESC", null)
         val projects = ArrayList<Project>()
         if (cursor.moveToFirst()) {
             do {
